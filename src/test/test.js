@@ -301,22 +301,8 @@ test('deletes subfolder of created dir', (t) => {
       , sub = join(p1, 'sub')
 
   mkdirp.sync(sub)
-
-  try {
-    tmp.del('sub', true)
-  } catch(err) {
-    t.fail(err)
-  }
-
-  t.notOk(existent.sync(sub), 'deleted (1) ' + debug(sub))
-
-  try {
-    tmp.del(sub, true)
-  } catch(err) {
-    t.fail(err)
-  }
-
-  t.notOk(existent.sync(sub), 'deleted (2) ' + debug(sub))
+  tmp.del(sub)
+  t.notOk(existent.sync(sub), 'deleted ' + debug(sub))
 
   t.throws(tmp.del.bind(tmp, '..'), 'may not be outside of dir')
 
