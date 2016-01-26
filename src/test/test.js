@@ -45,6 +45,10 @@ function del(t, tmp, ...paths) {
 
   const remaining = paths.filter(p => existent.sync(p))
   t.is(remaining.length, 0, 'paths deleted after del')
+
+  if (remaining.length > 0) {
+    t.fail('failed to delete: ' + remaining.join(', '))
+  }
 }
 
 test('basic', (t) => {
