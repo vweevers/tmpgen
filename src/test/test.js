@@ -35,7 +35,7 @@ function debug(path, root = TMP) {
 function del(t, tmp, ...paths) {
   while (Array.isArray(paths[0])) paths.unshift(...paths.shift())
 
-  paths = paths.concat(tmp.ctx.paths)
+  paths = paths.concat(tmp.ctx.created)
   paths = paths.filter((p,i) => paths.lastIndexOf(p) === i)
 
   t.ok(paths.length > 0, 'has paths')
@@ -58,7 +58,7 @@ function del(t, tmp, ...paths) {
 }
 
 test('basic', (t) => {
-  const tmp = tmpgen('*', { gen: genspy() })
+  const tmp = tmpgen('tmpgen-test-basic-*', { gen: genspy() })
 
   const p1 = tmp(), name1 = ''+tmp.gen.last
       , p2 = tmp(), name2 = ''+tmp.gen.last
@@ -70,8 +70,8 @@ test('basic', (t) => {
   t.ok(isPathInside(p1, TMP), 'is inside tmp')
   t.ok(isPathInside(p2, TMP), 'is inside tmp')
 
-  expect(t, p1, join(TMP, name1))
-  expect(t, p2, join(TMP, name2))
+  expect(t, p1, join(TMP, 'tmpgen-test-basic-'+name1))
+  expect(t, p2, join(TMP, 'tmpgen-test-basic-'+name2))
 
   del(t, tmp, p1, p2)
   t.end()
@@ -81,30 +81,31 @@ test('only last wildcard is dynamic', (t) => {
   let genvar = 'x'
 
   const gen = () => genvar
-  const tmp = tmpgen('tmpgen-test/*/*', { gen })
+  const tmp = tmpgen('tmpgen-test-dynamic/*/*', { gen })
+  const dir = join(TMP, 'tmpgen-test-dynamic')
 
   const p1 = tmp()
       , p2 = tmp()
 
   t.ok(p1 !== p2, 'two unique dirs')
 
-  t.ok(isPathInside(p1, join(TMP, 'tmpgen-test')), 'is inside tmp')
-  t.ok(isPathInside(p2, join(TMP, 'tmpgen-test')), 'is inside tmp')
+  t.ok(isPathInside(p1, dir), 'is inside tmp')
+  t.ok(isPathInside(p2, dir), 'is inside tmp')
 
-  expect(t, p1, join(TMP, 'tmpgen-test/x/x'))
-  expect(t, p2, join(TMP, 'tmpgen-test/x/xx'))
-  expect(t, tmp(), join(TMP, 'tmpgen-test/x/xxx'))
+  expect(t, p1, join(dir, 'x/x'))
+  expect(t, p2, join(dir, 'x/xx'))
+  expect(t, tmp(), join(dir, 'x/xxx'))
 
   genvar = 'y'
-  expect(t, tmp(), join(TMP, 'tmpgen-test/x/y'))
-  expect(t, tmp(), join(TMP, 'tmpgen-test/x/yy'))
+  expect(t, tmp(), join(dir, 'x/y'))
+  expect(t, tmp(), join(dir, 'x/yy'))
 
   del(t, tmp, p1, p2)
   t.end()
 })
 
 test('subdir', (t) => {
-  const tmp = tmpgen('tmpgen-test/*')
+  const tmp = tmpgen('tmpgen-test-subdir/*')
 
   const p1 = tmp()
       , p2 = tmp()
@@ -115,16 +116,16 @@ test('subdir', (t) => {
   t.ok(p1 !== p2, 'two unique dirs')
 
   t.ok(existent.sync([p1, p2]), 'created dirs')
-  t.ok(isPathInside(p1, join(TMP, 'tmpgen-test')), 'is inside tmp')
-  t.ok(isPathInside(p2, join(TMP, 'tmpgen-test')), 'is inside tmp')
+  t.ok(isPathInside(p1, join(TMP, 'tmpgen-test-subdir')), 'is inside tmp')
+  t.ok(isPathInside(p2, join(TMP, 'tmpgen-test-subdir')), 'is inside tmp')
 
   del(t, tmp, p1, p2)
   t.end()
 })
 
 test('many dirs', (t) => {
-  const tmp1 = tmpgen(), paths1 = []
-  const tmp2 = tmpgen({ gen: 'hat' }), paths2 = []
+  const tmp1 = tmpgen('tmpgen-test-many1/*'), paths1 = []
+  const tmp2 = tmpgen('tmpgen-test-many2/*', { gen: 'hat' }), paths2 = []
 
   for(let i=0, prev; i<20; i++) {
     const p = tmp1()
@@ -149,8 +150,8 @@ test('many dirs', (t) => {
 })
 
 test('resolves paths', (t) => {
-  const tmp = tmpgen('tmpgen-test/foo/../foo-*/../bar-*', { gen: genspy() })
-  expect(t, tmp(), join(TMP, 'tmpgen-test/bar-'+tmp.gen.last))
+  const tmp = tmpgen('tmpgen-test-resolve/foo/../foo-*/../bar-*', { gen: genspy() })
+  expect(t, tmp(), join(TMP, 'tmpgen-test-resolve/bar-'+tmp.gen.last))
   del(t, tmp)
   t.end()
 })
@@ -194,13 +195,13 @@ test('generator function', (t) => {
 })
 
 test('throws if no wildcard and dir exists', (t) => {
-  const tmp1 = tmpgen('tmpgen-test/*')
+  const tmp1 = tmpgen('tmpgen-test-no-wildcard/*')
       , p1 = tmp1()
       , name = basename(p1)
 
   t.ok(existent.sync(p1), debug(p1))
 
-  const tmp2 = tmpgen('tmpgen-test/'+name)
+  const tmp2 = tmpgen('tmpgen-test-no-wildcard/'+name)
   t.throws(tmp2)
 
   del(t, tmp1)
@@ -257,12 +258,13 @@ test('sub factory', (t) => {
 })
 
 test('factory takes additional path', (t) => {
-  const tmp = tmpgen({ gen: genspy('hat') })
+  const tmp = tmpgen('tmpgen-additional-path/*', { gen: genspy('hat') })
+  const dir = join(TMP, 'tmpgen-additional-path')
 
-  expect(t, tmp(), join(TMP, 'tmpgen', tmp.gen.last))
-  expect(t, tmp('beep'), join(TMP, 'tmpgen', tmp.gen.last, 'beep'))
-  expect(t, tmp('beep', 'boop'), join(TMP, 'tmpgen', tmp.gen.last, 'beep', 'boop'))
-  expect(t, tmp('beep/boop'), join(TMP, 'tmpgen', tmp.gen.last, 'beep', 'boop'))
+  expect(t, tmp(), join(dir, tmp.gen.last))
+  expect(t, tmp('beep'), join(dir, tmp.gen.last, 'beep'))
+  expect(t, tmp('beep', 'boop'), join(dir, tmp.gen.last, 'beep', 'boop'))
+  expect(t, tmp('beep/boop'), join(dir, tmp.gen.last, 'beep', 'boop'))
 
   t.throws(tmp.bind(null, '..'), 'cannot go outside of dir')
   t.throws(tmp.bind(null, 'a', '..', 'b', '..'), 'cannot be equal to dir')
@@ -294,7 +296,7 @@ test('del throws if dir was not created by factory', (t) => {
 })
 
 test('deletes subfolder of created dir', (t) => {
-  const tmp = tmpgen()
+  const tmp = tmpgen('tmpgen-del-subfolder/*')
       , p1 = tmp()
       , sub = join(p1, 'sub')
 
