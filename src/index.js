@@ -63,7 +63,7 @@ function tmpgen(path, opts) {
     return tmpgen(path, {...opts, ...subOpts, parent: fn})
   }
 
-  fn.del = (path) => {
+  fn.del = (path, _throw) => {
     const deleted = []
 
     if (path === undefined) {
@@ -98,7 +98,9 @@ function tmpgen(path, opts) {
         rimraf.sync(p)
         deleted.push(p)
         return true
-      } catch(_) {}
+      } catch(_) {
+        if (_throw) throw _
+      }
     }
   }
 

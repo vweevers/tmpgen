@@ -39,7 +39,13 @@ function del(t, tmp, ...paths) {
   paths = paths.filter((p,i) => paths.lastIndexOf(p) === i)
 
   t.ok(paths.length > 0, 'has paths')
-  t.ok(existent.sync(paths), 'paths exist prior to del')
+
+  const nonExistent = paths.filter(p => !existent.sync(p))
+  t.is(nonExistent.length, 0, 'paths exist prior to del')
+
+  if (nonExistent.length > 0) {
+    t.fail('do not exist: ' + nonExistent.join(', '))
+  }
 
   tmp.del()
 
@@ -293,8 +299,22 @@ test('deletes subfolder of created dir', (t) => {
       , sub = join(p1, 'sub')
 
   mkdirp.sync(sub)
-  tmp.del('sub')
-  t.notOk(existent.sync(sub), 'deleted ' + debug(sub))
+
+  try {
+    tmp.del('sub', true)
+  } catch(err) {
+    t.fail(err)
+  }
+
+  t.notOk(existent.sync(sub), 'deleted (1) ' + debug(sub))
+
+  try {
+    tmp.del(sub, true)
+  } catch(err) {
+    t.fail(err)
+  }
+
+  t.notOk(existent.sync(sub), 'deleted (2) ' + debug(sub))
 
   t.throws(tmp.del.bind(tmp, '..'), 'may not be outside of dir')
 
