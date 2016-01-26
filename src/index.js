@@ -8,8 +8,9 @@ const kindOf = require('kindof')
     , ts = require('monotonic-timestamp')
     , hat = require('hat').rack()
     , rimraf = require('rimraf')
+    , isAbsolute = require('is-absolute')
 
-const { resolve, sep, relative, isAbsolute, join } = require('path')
+const { resolve, sep, relative, join } = require('path')
 
 const TMP = require('osenv').tmpdir()
 const ALLOWED_GEN = /^[a-z0-9\-\._ ]+$/i
