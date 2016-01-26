@@ -1,6 +1,6 @@
 {
   "name": "tmpgen",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Create unique nested temporary directories",
   "license": "MIT",
   "author": {
