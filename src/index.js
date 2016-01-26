@@ -47,7 +47,7 @@ function tmpgen(path, opts) {
 
   const rel = relative(root, abs)
   const segments = split(rel)
-  const ctx = { paths: [] }
+  const ctx = { created: [], history: [], fill: [] }
 
   const fn = pathFactory.bind(ctx, path, segments, opts, root)
 
@@ -67,17 +67,17 @@ function tmpgen(path, opts) {
     const deleted = []
 
     if (path === undefined) {
-      ctx.paths = ctx.paths.filter(p => !del(p))
+      ctx.created = ctx.created.filter(p => !del(p))
     } else if (typeof path !== 'string') {
       throw new Error('tmpgen: expected a string path, got ' + kindOf(path))
     } else {
-      for(let i=0, l=ctx.paths.length; i<l; i++) {
-        const resolved = resolve(ctx.paths[i], path)
+      const resolved = resolve(root, path)
 
-        if (ctx.paths[i] === resolved) {
-          if (del(resolved)) ctx.paths.splice(i, 1)
+      for(let i=0, l=ctx.history.length; i<l; i++) {
+        if (ctx.history[i] === resolved) {
+          if (del(resolved)) ctx.history.splice(i, 1)
           return
-        } else if (isPathInside(resolved, ctx.paths[i])) {
+        } else if (isPathInside(resolved, ctx.history[i])) {
           return void del(resolved)
         }
       }
@@ -137,7 +137,6 @@ function getGenerator(gen) {
 function pathFactory(path, segments, opts, root, ...extraPath) {
   segments = segments.slice()
 
-  if (!this.fill) this.fill = []
   let base = [root], fill = this.fill.slice()
 
   while(segments.length) {
@@ -157,7 +156,7 @@ function pathFactory(path, segments, opts, root, ...extraPath) {
     const baseString = join(...base)
 
     if (dynamic === null) {
-      const made = recordMkdir(baseString, this.paths)
+      const made = recordMkdir(baseString, this.created)
 
       if (made == null && !segments.length) {
         const desc = 'does not contain wildcards and resolves to existing path'
@@ -174,7 +173,7 @@ function pathFactory(path, segments, opts, root, ...extraPath) {
       // i||1 means we don't repeat names the first two tries.
       // The second try is to see if the generator makes a new name
       // If it does not, we start repeating.
-      const res = make(baseString, dynamic, i||1, opts.gen, p, this.paths)
+      const res = make(baseString, dynamic, i||1, opts.gen, p, this.created)
       p = res.created
       evaluated = res.evaluated
     }
@@ -199,10 +198,11 @@ function pathFactory(path, segments, opts, root, ...extraPath) {
       throw new Error(`tmpgen: sub-path "${extraPath.join(sep)}" ${desc} "${result}"`)
     }
 
-    recordMkdir(sub, this.paths)
+    recordMkdir(sub, this.created)
     result = sub
   }
 
+  this.history.push(result)
   return result
 }
 
