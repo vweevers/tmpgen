@@ -1,0 +1,53 @@
+{
+  "name": "tmpgen",
+  "version": "0.0.1",
+  "description": "Create unique nested temporary directories",
+  "license": "MIT",
+  "author": {
+    "name": "Vincent Weevers",
+    "email": "mail@vincentweevers.nl"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "example.js"
+  ],
+  "scripts": {
+    "build": "babel -d lib src",
+    "test": "tape lib/test/*.js",
+    "build-and-test": "npm run build && npm test",
+    "watch": "onchange \"src/**/*.js\" -- npm run build-and-test"
+  },
+  "dependencies": {
+    "hat": "0.0.3",
+    "is-path-inside": "~1.0.0",
+    "kindof": "~2.0.0",
+    "mkdirp": "~0.5.1",
+    "monotonic-timestamp": "0.0.9",
+    "osenv": "~0.1.3",
+    "packpath": "~0.1.0",
+    "rimraf": "~2.5.0",
+    "unixify": "~0.2.1"
+  },
+  "devDependencies": {
+    "existent": "~1.0.1",
+    "tape": "~4.4.0"
+  },
+  "keywords": [
+    "directory",
+    "mkdirp",
+    "rimraf",
+    "rmrf",
+    "temp",
+    "temporary",
+    "tmp",
+    "tmpdir"
+  ],
+  "engines": {
+    "node": ">=0.10.0",
+    "npm": ">=2.0.0"
+  },
+  "repository": "vweevers/tmpgen",
+  "bugs": "https://github.com/vweevers/tmpgen/issues",
+  "homepage": "https://github.com/vweevers/tmpgen"
+}
