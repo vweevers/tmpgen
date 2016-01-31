@@ -16,7 +16,6 @@ addons:
 install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
   - nvm install $NODE_VERSION
-  - nvm use $NODE_VERSION
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
   - $CXX --version
   - npm i -g npm@latest-2
