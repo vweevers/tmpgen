@@ -7,6 +7,7 @@ const tmpgen = require('../')
     , ts = require('monotonic-timestamp')
     , rimraf = require('rimraf')
     , mkdirp = require('mkdirp')
+    , spawn = require('cross-spawn-async')
 
 const { join, basename, relative, dirname } = require('path')
 
@@ -331,4 +332,70 @@ test('repeats names', (t) => {
   del(t, tmp2)
 
   t.end()
+})
+
+test('cleans on process exit', (t) => {
+  t.plan(6)
+
+  const child = spawn('node', [join(__dirname, 'scripts', 'clean.js')])
+  let paths = [];
+
+  child.on('error', t.fail.bind(t))
+
+  child.stdout.on('data', (data) => {
+    if (paths.length >= 2) return t.fail('Unexpected output: ' + data)
+    const path = data.toString().trim()
+    t.ok(existent.sync(path), 'created: ' + path)
+    paths.push(path)
+  })
+
+  child.on('close', (code) => {
+    t.is(code, 0, 'exit code 0')
+
+    t.notOk(existent.sync(paths[0]), 'deleted: ' + paths[0])
+    t.notOk(existent.sync(paths[1]), 'deleted: ' + paths[1])
+
+    const parent = dirname(paths[0])
+    t.notOk(existent.sync(parent), 'deleted parent: ' + parent)
+  })
+})
+
+test('cleans on process exit with code', (t) => {
+  t.plan(3)
+
+  const child = spawn('node', [join(__dirname, 'scripts', 'clean-with-exitcode.js')])
+  let path;
+
+  child.on('error', t.fail.bind(t))
+
+  child.stdout.once('data', (data) => {
+    path = data.toString().trim()
+    t.ok(existent.sync(path), 'created: ' + path)
+  })
+
+  child.on('close', (code) => {
+    t.is(code, 293, 'exit code 293')
+    const parent = dirname(path)
+    t.notOk(existent.sync(parent), 'deleted: ' + parent)
+  })
+})
+
+test('cleans on process exit with error', (t) => {
+  t.plan(3)
+
+  const child = spawn('node', [join(__dirname, 'scripts', 'clean-with-error.js')])
+  let path;
+
+  child.on('error', t.fail.bind(t))
+
+  child.stdout.once('data', (data) => {
+    path = data.toString().trim().split(/[\r\n]+/)[0]
+    t.ok(existent.sync(path), 'created: ' + path)
+  })
+
+  child.on('close', (code) => {
+    t.ok(code !== 0, 'exit code not 0')
+    const parent = dirname(path)
+    t.notOk(existent.sync(parent), 'deleted: ' + parent)
+  })
 })

@@ -103,14 +103,28 @@ function tmpgen(path, opts) {
   }
 
   if (opts.clean) {
-    process.on('exit', (code) => {
-      if (!code || opts.always) {
-        try { fn.del() } catch(_) { }
-      }
-    })
+    cleanOnExit(fn, opts.always)
   }
 
   return fn
+}
+
+function cleanOnExit(fn, always) {
+  let factories = cleanOnExit.factories
+
+  if (!factories) {
+    factories = cleanOnExit.factories = []
+
+    process.on('exit', (code) => {
+      factories.forEach(([fn, always]) => {
+        if (code === 0 || always) {
+          try { fn.del() } catch(_) { }
+        }
+      })
+    })
+  }
+
+  factories.push([fn, always])
 }
 
 function getGenerator(gen) {

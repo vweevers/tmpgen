@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "build": "babel -d lib src",
-    "test": "tape lib/test/*.js",
-    "build-and-test": "npm run build && npm test",
+    "test": "node lib/test/test.js",
+    "build-test": "npm run build && npm test",
     "watch": "onchange \"src/**/*.js\" -- npm run build-and-test"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "unixify": "~0.2.1"
   },
   "devDependencies": {
+    "cross-spawn-async": "~2.1.8",
     "existent": "~1.0.1",
     "tape": "~4.4.0"
   },
