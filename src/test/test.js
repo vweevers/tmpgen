@@ -374,7 +374,7 @@ test('cleans on process exit with code', (t) => {
   })
 
   child.on('close', (code) => {
-    t.is(code, 293, 'exit code 293')
+    t.ok(code !== 0, 'exit code not 0')
     const parent = dirname(path)
     t.notOk(existent.sync(parent), 'deleted: ' + parent)
   })
