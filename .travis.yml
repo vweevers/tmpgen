@@ -1,7 +1,25 @@
-language: node_js
+env:
+  - NODE_VERSION="0.10"
+  - NODE_VERSION="4.2"
+  - NODE_VERSION="5.4"
 os:
   - linux
   - osx
-node_js:
-  - "0.10"
-  - "4"
+sudo: false
+language: cpp
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+  - nvm use $NODE_VERSION
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
+  - $CXX --version
+  - npm i -g npm@latest-2
+  - npm install
+script:
+  - npm test
