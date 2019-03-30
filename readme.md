@@ -2,7 +2,7 @@
 
 **Create unique nested temporary directories. Makes factories according to a path spec with wildcards. Each wildcard gets replaced with a generated name, by [monotonic-timestamp](https://github.com/dominictarr/monotonic-timestamp) (the default), [hat](https://github.com/substack/node-hat) or a custom generator. If this results in an existing path, the generator is called again, and if that doesn't work, `tmpgen` starts concatenating names. Has utilities to remove the created directories, but does not delete anything by default.**
 
-[![npm status](http://img.shields.io/npm/v/tmpgen.svg?style=flat-square)](https://www.npmjs.org/package/tmpgen) [![Travis build status](https://img.shields.io/travis/vweevers/tmpgen.svg?style=flat-square&label=travis)](http://travis-ci.org/vweevers/tmpgen) [![AppVeyor build status](https://img.shields.io/appveyor/ci/vweevers/tmpgen.svg?style=flat-square&label=appveyor)](https://ci.appveyor.com/project/vweevers/tmpgen) [![Dependency status](https://img.shields.io/david/vweevers/tmpgen.svg?style=flat-square)](https://david-dm.org/vweevers/tmpgen)
+[![npm status](http://img.shields.io/npm/v/tmpgen.svg?style=flat-square)](https://www.npmjs.org/package/tmpgen) [![Travis build status](https://img.shields.io/travis/vweevers/tmpgen.svg?style=flat-square&label=travis)](http://travis-ci.org/vweevers/tmpgen) [![AppVeyor build status](https://img.shields.io/appveyor/ci/vweevers/tmpgen.svg?style=flat-square&label=appveyor)](https://ci.appveyor.com/project/vweevers/tmpgen) [![Dependency status](https://img.shields.io/david/vweevers/tmpgen.svg?style=flat-square)](https://david-dm.org/vweevers/tmpgen) [![Greenkeeper badge](https://badges.greenkeeper.io/vweevers/tmpgen.svg)](https://greenkeeper.io/)
 
 ## concrete example
 
